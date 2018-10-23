@@ -152,18 +152,22 @@ public class GridMapWindow : EditorWindow
         if (newIndex != currIndex)
             EditorApplication.delayCall += () => Selection.activeObject = maps[newIndex];
 
-        //The open scene
-        /*GUI.enabled = false;
-        EditorGUILayout.ObjectField("Scene", sceneAsset, typeof(SceneAsset), false);
-        GUI.enabled = true;*/
-        EditorGUILayout.BeginHorizontal();
         var sceneIcon = EditorGUIUtility.IconContent("SceneAsset Icon").image;
-        EditorGUILayout.LabelField(new GUIContent("Scene"), new GUIContent(" " + scene.name, sceneIcon), EditorStyles.boldLabel);
-        var viewIcon = EditorGUIUtility.IconContent("ViewToolZoom").image;
-        if (GUILayout.Button(new GUIContent("", viewIcon), EditorStyles.miniButton, GUILayout.Width(20f), GUILayout.MaxHeight(EditorGUIUtility.singleLineHeight)))
+
+        //The open scene
+        EditorGUILayout.BeginHorizontal();
+        var sceneName = scene.name;
+        if (string.IsNullOrEmpty(sceneName))
+            sceneName = "Untitled";
+        EditorGUILayout.LabelField(new GUIContent("Scene"), new GUIContent(" " + sceneName, sceneIcon), EditorStyles.boldLabel);
+        if (sceneAsset != null)
         {
-            Selection.activeObject = sceneAsset;
-            EditorGUIUtility.PingObject(sceneAsset);
+            var viewIcon = EditorGUIUtility.IconContent("ViewToolZoom").image;
+            if (GUILayout.Button(new GUIContent("", viewIcon), EditorStyles.miniButton, GUILayout.Width(20f), GUILayout.MaxHeight(EditorGUIUtility.singleLineHeight)))
+            {
+                Selection.activeObject = sceneAsset;
+                EditorGUIUtility.PingObject(sceneAsset);
+            }
         }
         EditorGUILayout.EndHorizontal();
 
@@ -250,7 +254,7 @@ public class GridMapWindow : EditorWindow
                     GUI.color = new Color(0.7f, 0.7f, 0.7f, 1f);
                 else
                     GUI.color = Color.white;
-
+                
                 if (GUI.Button(btnRect, string.Empty))
                 {
                     var targ = Selection.activeObject as GridMap;
@@ -280,6 +284,13 @@ public class GridMapWindow : EditorWindow
                         };
                     }
                 }
+
+                if (posAsset != null)
+                {
+                    GUI.enabled = pos == scenePos;
+                    GUI.DrawTexture(new Rect(btnRect.x + 4f, btnRect.y + 4f, btnRect.width - 8f, btnRect.height - 8f), sceneIcon);
+                }
+
                 GUI.enabled = true;
             }
         }
