@@ -15,35 +15,8 @@ public class GridMapWindow : EditorWindow
         var icon = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/GridMap/Gizmos/GridMapWindow Icon.png");
         var win = GetWindow<GridMapWindow>("Grid Map", true, type);
         win.titleContent = new GUIContent("Grid Map", icon);
+        win.minSize = new Vector2(254f, 0f);
         win.Show();
-    }
-
-    bool drawRoomBounds
-    {
-        get { return EditorPrefs.GetBool("GridMapWindow_drawRoomBounds", true); }
-        set { EditorPrefs.SetBool("GridMapWindow_drawRoomBounds", value); }
-    }
-
-    Color32 roomBoundsColor
-    {
-        get
-        {
-            var col = new Color32(0xff, 0xff, 0x00, 0xff);
-            unchecked
-            {
-                int hex = EditorPrefs.GetInt("GridMapWindow_roomBoundsColor", (int)0xffff00ff);
-                col.r = (byte)((hex >> 24) & 0xff);
-                col.g = (byte)((hex >> 16) & 0xff);
-                col.b = (byte)((hex >> 8) & 0xff);
-                col.a = (byte)(hex & 0xff);
-            }
-            return col;
-        }
-        set
-        {
-            int hex = (value.r << 24) | (value.g << 16) | (value.b << 8) | value.a;
-            EditorPrefs.SetInt("GridMapWindow_roomBoundsColor", hex);
-        }
     }
 
     void OnEnable()
@@ -64,7 +37,7 @@ public class GridMapWindow : EditorWindow
 
     void OnSceneGUI(SceneView view)
     {
-        if (!drawRoomBounds)
+        if (!GridMapPrefs.drawRoomBounds)
             return;
 
         var map = Selection.activeObject as GridMap;
@@ -106,7 +79,7 @@ public class GridMapWindow : EditorWindow
         var scale = map.roomBounds.size;
         var rot = Quaternion.FromToRotation(Vector3.forward, axis.normalized);
         Handles.matrix = Matrix4x4.Translate(pos) * Matrix4x4.Rotate(rot) * Matrix4x4.Scale(scale);
-        Handles.color = roomBoundsColor;
+        Handles.color = GridMapPrefs.roomBoundsColor;
         Handles.RectangleHandleCap(0, Vector3.zero, Quaternion.identity, 0.5f, EventType.Repaint);
         Handles.RectangleHandleCap(0, Vector3.zero, Quaternion.identity, 0.51f, EventType.Repaint);
     }
@@ -173,14 +146,26 @@ public class GridMapWindow : EditorWindow
         for (int i = 0; i < names.Length; ++i)
             names[i] = maps[i].name;
 
-        //The map and scene info
+        //The selected map
         int currIndex = maps.IndexOf(map);
         var newIndex = EditorGUILayout.Popup("Map", currIndex, names);
         if (newIndex != currIndex)
             EditorApplication.delayCall += () => Selection.activeObject = maps[newIndex];
-        GUI.enabled = false;
+
+        //The open scene
+        /*GUI.enabled = false;
         EditorGUILayout.ObjectField("Scene", sceneAsset, typeof(SceneAsset), false);
-        GUI.enabled = true;
+        GUI.enabled = true;*/
+        EditorGUILayout.BeginHorizontal();
+        var sceneIcon = EditorGUIUtility.IconContent("SceneAsset Icon").image;
+        EditorGUILayout.LabelField(new GUIContent("Scene"), new GUIContent(" " + scene.name, sceneIcon), EditorStyles.boldLabel);
+        var viewIcon = EditorGUIUtility.IconContent("ViewToolZoom").image;
+        if (GUILayout.Button(new GUIContent("", viewIcon), EditorStyles.miniButton, GUILayout.Width(20f), GUILayout.MaxHeight(EditorGUIUtility.singleLineHeight)))
+        {
+            Selection.activeObject = sceneAsset;
+            EditorGUIUtility.PingObject(sceneAsset);
+        }
+        EditorGUILayout.EndHorizontal();
 
         //If no map is selected, don't render any more
         if (map == null)
@@ -201,10 +186,6 @@ public class GridMapWindow : EditorWindow
             map.roomBounds = newBounds;
             map.roomBoundsAxis = newAxis;
         }
-
-        //Room bounds drawing
-        drawRoomBounds = EditorGUILayout.Toggle("Draw Room Bounds", drawRoomBounds);
-        roomBoundsColor = EditorGUILayout.ColorField("Room Bounds Color", roomBoundsColor);
 
         //Shift map arrows
         EditorGUILayout.BeginHorizontal();
