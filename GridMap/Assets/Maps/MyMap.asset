@@ -9,13 +9,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 318a3ed6f07a74647bf8394bcf19c59c, type: 3}
-  m_Name: TestMap
+  m_Name: MyMap
   m_EditorClassIdentifier: 
   size: 9
   roomBounds:
     serializedVersion: 2
     x: -5
     y: -5
-    width: 8.1
+    width: 10
     height: 10
   roomBoundsAxis: {x: 0, y: 1, z: 0}
