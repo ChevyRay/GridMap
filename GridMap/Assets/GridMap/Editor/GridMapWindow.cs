@@ -285,13 +285,14 @@ public class GridMapWindow : EditorWindow
                     }
                 }
 
+                GUI.enabled = true;
+
                 if (posAsset != null)
                 {
-                    GUI.enabled = pos == scenePos;
+                    if (pos == scenePos)
+                        GUI.color = Color.white;
                     GUI.DrawTexture(new Rect(btnRect.x + 4f, btnRect.y + 4f, btnRect.width - 8f, btnRect.height - 8f), sceneIcon);
                 }
-
-                GUI.enabled = true;
             }
         }
         GUI.color = Color.white;
